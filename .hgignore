@@ -1,0 +1,14 @@
+syntax: glob
+*~
+*.pyc
+*.orig
+*.sublime*
+*.egg-info
+build
+dist
+MANIFEST
+_build
+metrics
+env
+.coverage
+
