@@ -7,7 +7,11 @@ __docformat__ = 'reStructuredText'
 
 import re
 from docutils import nodes, writers, frontend
-from docutils.math import pick_math_environment
+try:
+    # docutils >= 0.10
+    from docutils.utils.math import pick_math_environment
+except ImportError:
+    from docutils.math import pick_math_environment
 from genshi.builder import tag
 from genshi.output import XHTMLSerializer
 from genshi.core import Markup
@@ -41,7 +45,7 @@ class HTML5Writer(writers.Writer):
         )
     )
 
-    settings_defaults = {'tab_width': 4}
+    settings_defaults = {'tab_width': 4, 'syntax_highlight': 'short'}
 
     def __init__(self):
         writers.Writer.__init__(self)
