@@ -243,7 +243,7 @@ class HTML5Translator(nodes.NodeVisitor):
         'citation_reference': ('a', 'visit_citation_reference',
                                'depart_citation_reference', True, False),
         'classifier': (None, 'visit_classifier', None),
-        'colspec': ('col', dv, 'depart_colspec'),
+        'colspec': (None, pass_, 'depart_colspec'),
         'comment': (None, 'skip_node', None),
         'compound': ('div', dv, dp, True),
         'contact': (None, 'visit_field_list_item', 'depart_field_list_item'),
@@ -257,8 +257,7 @@ class HTML5Translator(nodes.NodeVisitor):
         'definition_list_item': (None, 'do_nothing', None),
         'description': ('td', dv, dp),
         'docinfo': (None, 'visit_docinfo', 'depart_docinfo', True),
-        'doctest_block': ('pre', 'visit_literal_block',
-                          'depart_literal_block', True),
+        'doctest_block': ('pre', 'visit_literal_block', 'depart_literal_block', True),
         'document': (None, 'visit_document', 'depart_document'),
         'emphasis': ('em', dv, dp, False, False),
         'entry': (None, dv, 'depart_entry'),
@@ -271,8 +270,7 @@ class HTML5Translator(nodes.NodeVisitor):
         'figure': (None, dv, dp),
         'footer': (None, dv, dp),
         'footnote': (None, 'visit_citation', 'depart_citation', True),
-        'footnote_reference': ('a', 'visit_label',
-                               'depart_citation_reference', True, False),
+        'footnote_reference': ('a', 'visit_label', 'depart_citation_reference', True, False),
         'generated': (None, 'do_nothing', None),
         'header': (None, dv, dp),
         'hint': ('aside', 'visit_aside', 'depart_aside', True),
@@ -285,8 +283,7 @@ class HTML5Translator(nodes.NodeVisitor):
         'line_block': ('pre', 'visit_line_block', 'depart_line_block', True),
         'list_item': ('li', dv, dp),
         'literal': ('code', 'visit_literal', None),
-        'literal_block': ('pre', 'visit_literal_block',
-                          'depart_literal_block'),
+        'literal_block': ('pre', 'visit_literal_block', 'depart_literal_block'),
         'math': (None, 'visit_math_block', None),
         'math_block': (None, 'visit_math_block', None),
         'meta': (None, 'visit_meta', None),
@@ -297,15 +294,12 @@ class HTML5Translator(nodes.NodeVisitor):
         'option_list': (None, 'visit_docinfo', 'depart_docinfo', True),
         'option_list_item': ('tr', dv, dp),
         'option_string': (None, 'do_nothing', None),
-        'organization': (None, 'visit_field_list_item',
-                         'depart_field_list_item'),
+        'organization': (None, 'visit_field_list_item', 'depart_field_list_item'),
         'paragraph': ('p', 'visit_paragraph', dp),
         'pending': (None, dv, dp),
-        'problematic': ('a', 'visit_problematic', 'depart_reference', True,
-                        False),
+        'problematic': ('a', 'visit_problematic', 'depart_reference', True, False),
         'raw': (None, 'visit_raw', None),
-        'reference': ('a', 'visit_reference', 'depart_reference', False,
-                      False),
+        'reference': ('a', 'visit_reference', 'depart_reference', False, False),
         'revision': (None, 'visit_field_list_item', 'depart_field_list_item'),
         'row': ('tr', 'visit_row', 'depart_row'),
         'rubric': ('p', dv, 'depart_rubric', True),
@@ -617,13 +611,17 @@ class HTML5Translator(nodes.NodeVisitor):
 
     def depart_colspec(self, node):
         '''
-        A "stub" attribute indicates that the column should be a th tag.
-        It could be resolved by CSS3 instead...
-        See `The HTML col and colgroup elements <http://goo.gl/8FERk>`_
+        <col /> tags are not generated anymore because they're pretty useless
+        since they cannot receive any attribute from a rst table.
+        Anyway, there are better ways to apply styles to columns.
+        See http://csswizardry.com/demos/zebra-striping/ for example.
+
+        Nevertheless,
+        if a colspec node with a "stub" attribute indicates that the column should be a th tag.
         '''
         if 'stub' in node:
             self.th_required += 1
-        self.default_departure(node)
+        return
 
     def visit_thead(self, node):
         self.in_thead = True
@@ -791,9 +789,6 @@ class HTML5Translator(nodes.NodeVisitor):
 
     def visit_docinfo(self, node):
         self.context.begin_elem()  # table
-        col = tag.col
-        self.context.append(col)
-        self.context.append(col)
         self.context.begin_elem()  # tbody
 
     def depart_docinfo(self, node):
