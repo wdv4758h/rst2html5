@@ -1,0 +1,3 @@
+docutils==0.11
+Genshi==0.7
+Pygments
