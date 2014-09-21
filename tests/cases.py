@@ -53,25 +53,7 @@ title_accented_chars = {
     'part': 'body',
 }
 
-title_2 = {
-    'rst': '''
-Level 1
-=======
-
-some text
-
-Level 1 Again
-=============''',
-    'out': '<section id="level-1"><h1>Level 1</h1>'
-           '<p>some text</p></section>'
-           '<section id="level-1-again"><h1>Level 1 Again</h1>'
-           '</section>',
-    'indent_output': False,
-    'part': 'body',
-}
-
-
-title_3 = {
+sections_1 = {
     'rst': '''
 =======
 Level 1
@@ -106,6 +88,46 @@ link to `section 2`_''',
     'part': 'body',
 }
 
+# http://docutils.sourceforge.net/docs/user/rst/quickstart.html#sections
+
+sections_2 = {
+    'rst': '''
+Chapter 1 Title
+===============
+
+Section 1.1 Title
+-----------------
+
+Subsection 1.1.1 Title
+~~~~~~~~~~~~~~~~~~~~~~
+
+Section 1.2 Title
+-----------------
+
+Chapter 2 Title
+===============''',
+    'part': 'body',
+    'out': '''
+    <section id="chapter-1-title">
+        <h1>Chapter 1 Title</h1>
+        <section id="section-1-1-title">
+            <h2>Section 1.1 Title</h2>
+            <section id="subsection-1-1-1-title">
+                <h3>Subsection 1.1.1 Title</h3>
+            </section>
+        </section>
+        <section id="section-1-2-title">
+            <h2>Section 1.2 Title</h2>
+        </section>
+    </section>
+    <section id="chapter-2-title">
+        <h1>Chapter 2 Title</h1>
+    </section>
+''',
+}
+
+
+# http://docutils.sourceforge.net/docs/user/rst/quickstart.html#document-title-subtitle
 
 subtitle = {
     'rst': '''
@@ -124,34 +146,6 @@ Section Title
            '<section id="section-title"><h1>Section Title</h1>'
            '<p>...</p></section>',
     'indent_output': False,
-    'part': 'body',
-}
-
-
-'''
-The subtitle processing should deal with indentation
-'''
-subtitle_2 = {
-    'rst': '''
-================
- Document Title
-================
-----------
- Subtitle
-----------
-
-Section Title
-=============
-
-...''',
-    'out': '''
-    <h1>Document Title</h1>
-    <h2>Subtitle</h2>
-    <section id="section-title">
-        <h1>Section Title</h1>
-        <p>...</p>
-    </section>
-''',
     'part': 'body',
 }
 
@@ -526,7 +520,8 @@ point to this paragraph.''',
     'out': '''
     <p>Links to <a href="#outer-target">outer_target</a> and <a href="#inner-target">inner_target</a>.</p>
     <a id="outer-target"></a>
-    <p id="inner-target">The targets "outer_target" and "inner_target" are synonyms; they both point to this paragraph.</p>
+    <p id="inner-target">The targets "outer_target" and "inner_target" are synonyms; \
+they both point to this paragraph.</p>
 ''',
     'part': 'body'
 }
@@ -1077,6 +1072,7 @@ epigraph = {
 
 compound = {
     'rst': '''.. compound::
+   :class: custom
 
    The 'rm' command is very dangerous.  If you are logged
    in as root and enter ::
@@ -1086,7 +1082,7 @@ compound = {
 
    you will erase the entire contents of your file system.''',
     'out': '''
-    <div class="compound">
+    <div class="custom">
         <p>The 'rm' command is very dangerous. If you are logged in as root and enter</p>
         <pre>cd /
 rm -rf *</pre>
@@ -1100,7 +1096,7 @@ container = {
     'rst': '''.. container:: custom
 
    This paragraph might be rendered in a custom way.''',
-    'out': '<div class="container custom">This paragraph might be rendered '
+    'out': '<div class="custom">This paragraph might be rendered '
            'in a custom way.</div>',
     'indent_output': False,
     'part': 'body',

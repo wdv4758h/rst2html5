@@ -4,10 +4,11 @@
 from __future__ import unicode_literals
 
 __docformat__ = 'reStructuredText'
+__version__ = '1.3'
 
 import re
 import sys
-from docutils import nodes, writers, frontend
+from docutils import nodes, writers
 from docutils.transforms import Transform
 from collections import OrderedDict
 try:
@@ -69,55 +70,55 @@ class HTML5Writer(writers.Writer):
 
     # OptParse see https://docs.python.org/2/library/optparse.html
     settings_spec = (
-        'HTML5 Specific Options',
-        None, (
-        ("Don't indent output", ['--no-indent'],
-            {'default': 1, 'action': 'store_false', 'dest': 'indent_output'}),
-        ('Specify a stylesheet URL to be included in the output HTML file. '
-         '(This option can be used multiple times)',
-            ['--stylesheet'],
-            {'metavar': '<URL or path>', 'default': None,
-             'action': 'append', }),
-        ('Specify a script URL to be included in the output HTML file. '
-         '(This option can be used multiple times)',
-            ['--script'],
-            {'metavar': '<URL or path>', 'default': None,
-             'dest': 'script',
-             'type': 'string',
-             'action': 'callback',
-             'callback': _script_callback_option_parser, }),
-        ('Specify a script URL with a defer attribute '
-         'to be included in the output HTML file. '
-         '(This option can be used multiple times)',
-            ['--script-defer'],
-            {'metavar': '<URL or path>',
-             'dest': 'script',
-             'type': 'string',
-             'action': 'callback',
-             'callback': _script_callback_option_parser, }),
-        ('Specify a script URL with a async attribute '
-         'to be included in the output HTML file. '
-         '(This option can be used multiple times)',
-            ['--script-async'],
-            {'metavar': '<URL or path>',
-             'dest': 'script',
-             'type': 'string',
-             'action': 'callback',
-             'callback': _script_callback_option_parser, }),
-        ('Specify a html tag attribute. '
-         '(This option can be used multiple times)',
-            ['--html-tag-attr'],
-            {'metavar': '<attribute>', 'default': None,
-             'dest': 'html_tag_attr',
-             'action': 'append', }),
-        ('Specify a filename or text to be used as the HTML5 output template. '
-         'The template must have the {head} and {body} placeholders. '
-         'The "<html{html_attr}>" placeholder is recommended.',
-            ['--template'],
-            {'metavar': '<filename or text>', 'default': None,
-             'dest': 'template',
-             'type': 'string',
-             'action': 'store', }),
+        'rst2html5 Specific Options',
+        'For the rst2html5 writer the default tab width value is 4.', (
+            ("Don't indent output", ['--no-indent'],
+                {'default': 1, 'action': 'store_false', 'dest': 'indent_output'}),
+            ('Specify a stylesheet URL to be included in the output HTML file. '
+                '(This option can be used multiple times)',
+                ['--stylesheet'],
+                {'metavar': '<URL or path>', 'default': None,
+                    'action': 'append', }),
+            ('Specify a script URL to be included in the output HTML file. '
+                '(This option can be used multiple times)',
+                ['--script'],
+                {'metavar': '<URL or path>', 'default': None,
+                    'dest': 'script',
+                    'type': 'string',
+                    'action': 'callback',
+                    'callback': _script_callback_option_parser, }),
+            ('Specify a script URL with a defer attribute '
+             'to be included in the output HTML file. '
+             '(This option can be used multiple times)',
+                ['--script-defer'],
+                {'metavar': '<URL or path>',
+                 'dest': 'script',
+                 'type': 'string',
+                 'action': 'callback',
+                 'callback': _script_callback_option_parser, }),
+            ('Specify a script URL with a async attribute '
+             'to be included in the output HTML file. '
+             '(This option can be used multiple times)',
+                ['--script-async'],
+                {'metavar': '<URL or path>',
+                 'dest': 'script',
+                 'type': 'string',
+                 'action': 'callback',
+                 'callback': _script_callback_option_parser, }),
+            ('Specify a html tag attribute. '
+             '(This option can be used multiple times)',
+                ['--html-tag-attr'],
+                {'metavar': '<attribute>', 'default': None,
+                 'dest': 'html_tag_attr',
+                 'action': 'append', }),
+            ('Specify a filename or text to be used as the HTML5 output template. '
+             'The template must have the {head} and {body} placeholders. '
+             'The "<html{html_attr}>" placeholder is recommended.',
+                ['--template'],
+                {'metavar': '<filename or text>', 'default': None,
+                 'dest': 'template',
+                 'type': 'string',
+                 'action': 'store', }),
         )
     )
 
@@ -258,9 +259,9 @@ class HTML5Translator(nodes.NodeVisitor):
         'classifier': (None, 'visit_classifier', None),
         'colspec': (None, pass_, 'depart_colspec'),
         'comment': (None, 'skip_node', None),
-        'compound': ('div', dv, dp, True),
+        'compound': ('div', dv, dp),
         'contact': (None, 'visit_bibliographic_field', None),
-        'container': ('div', dv, dp, True),
+        'container': ('div', dv, dp),
         'copyright': (None, 'visit_bibliographic_field', None),
         'danger': ('aside', 'visit_aside', 'depart_aside', True),
         'date': (None, 'visit_bibliographic_field', None),
@@ -409,7 +410,7 @@ class HTML5Translator(nodes.NodeVisitor):
         html_attrs = html_attrs and ' ' + ' '.join(html_attrs) or ''
         self.head = self.metatags + self.stylesheets + self.scripts
         for key, value in self.docinfo.items():
-            self.head.append(tag.meta(name=key, content=value))
+            self.head.append(tag.meta(content=value, name=key))
         self.indent_head()
         self.head = ''.join(XHTMLSerializer()(tag(*self.head)))
         self.body = ''.join(XHTMLSerializer()(tag(*self.context.stack)))
@@ -444,7 +445,6 @@ class HTML5Translator(nodes.NodeVisitor):
         if use_name_in_class:
             node['classes'].insert(0, node_class_name)
 
-        attributes = {}
         replacements = {
             'refuri': 'href', 'uri': 'src', 'refid': 'href',
             'morerows': 'rowspan', 'morecols': 'colspan', 'classes': 'class',
@@ -454,6 +454,7 @@ class HTML5Translator(nodes.NodeVisitor):
             'names', 'dupnames', 'bullet', 'enumtype', 'colwidth', 'stub',
             'backrefs', 'auto', 'anonymous',
         )
+        attributes = {}
         for k, v in node.attributes.items():
             if k in ignores or not v:
                 continue
@@ -508,7 +509,7 @@ class HTML5Translator(nodes.NodeVisitor):
         Determine if the <p> tags around paragraph ``node`` can be omitted.
         Based on :func:`docutils.writers.html4css1.HTMLTranslator.should_be_compact_paragraph`
         """
-        # extra oarenthesis for pep8 alignment conformity
+        # extra parenthesis for pep8 alignment conformity
         if ((isinstance(node.parent, (nodes.document, nodes.compound,
                         nodes.block_quote, nodes.system_message, )) or
              node['classes'] or 'paragraph' != node.__class__.__name__)):
@@ -558,11 +559,6 @@ class HTML5Translator(nodes.NodeVisitor):
                 self.heading_level = 1
             if 'href' in attr:
                 # backref to toc entry
-                # anchor = tag.a(href=("#" + attr['href']), class_="toc-backref")
-                # self.context.commit_elem(anchor)
-                # anchor = self.context.pop()
-                # self.context.begin_elem()
-                # self.context.append(anchor, indent=False)
                 del attr['href']
             elem = getattr(tag, 'h' + unicode(self.heading_level))(**attr)
         self.context.commit_elem(elem, indent)

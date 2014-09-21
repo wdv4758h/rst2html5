@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 
 import os
-import sys
 import unittest
 
 from rst2html5 import HTML5Writer
@@ -31,6 +30,7 @@ def rst_to_html5_part(case):
     return publish_parts(writer=HTML5Writer(), source=rst,
                          settings_overrides=overrides)[part]
 
+
 def extract_variables(module):
     '''
     Extract variables of a test data module.
@@ -40,6 +40,7 @@ def extract_variables(module):
     return ((v, getattr(module, v)) for v in dir(module)
             if not v.startswith('__') and isinstance(getattr(module, v), dict))
 
+
 def test():
     # do not use docstrings
     # see http://code.google.com/p/python-nose/issues/detail?id=244#c1
@@ -48,6 +49,7 @@ def test():
         func = partial(check_part)
         func.description = test_name
         yield func, test_name, case
+
 
 def check_part(test_name, case):
     result = rst_to_html5_part(case)
@@ -59,4 +61,4 @@ def check_part(test_name, case):
             f.write(result)
         with open(filename + '.expected', encoding='utf-8', mode='w') as f:
             f.write(case['out'])
-    assert_equals(result, case['out'])
+    assert_equals(case['out'], result)  # better diff visualization
